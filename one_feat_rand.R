@@ -20,11 +20,9 @@ test_data <- testing(data_split)
 nt <- 100 # number of trees in each round
 
 
-errors_feat <- c()
-
-for(i in 1:100){
+get.error <- function(i){
   
-  feat <- sample(colnames(subset(train_data, select = -c(class)), 1))
+  feat <- sample(colnames(subset(train_data, select = -c(class))), 1)
   formula = as.formula(paste("class ~", feat))
   
   bio.rf <- randomForest(formula, type = 'classification', data = train_data, 
@@ -32,12 +30,11 @@ for(i in 1:100){
   y.hat <- predict(bio.rf, newdata = test_data[-10])
   
   cm <- table(test_data$class, y.hat)
-  test_error[i] <- as.numeric((cm[2,1] + cm[1,2])/sum(cm))
+  as.numeric((cm[2,1] + cm[1,2])/sum(cm))
   
-  errors_feat[i] <- mean(test_error)
 }
 
-errors_feat
+result <- t(sapply(1:100, get.error))
+mean(result)
 
-ggplot() + geom_point(aes(x = 1:100, y = errors_feat))
-
+ggplot() + geom_point(aes(x = 1:length(result), y = result))

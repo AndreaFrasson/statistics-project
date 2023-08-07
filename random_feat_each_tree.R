@@ -11,10 +11,10 @@ grow <- function(dati, ntree){
   for(i in 1:ntree){
     
     #from training set, extract a new training with replacement
-    new_training <- df[sample(nrow(dati), replace = T), ]  
+    new_training <- dati[sample(nrow(dati), replace = T), ]  
     
     # Create the formula using the selected features as predictors
-    theta_k <- sample(colnames(subset(df, select = -c(class)), 1))
+    theta_k <- sample(colnames(subset(dati, select = -c(class))), 1)
     formula <- as.formula(paste("class ~", theta_k))
     
     #Decision tree with random features

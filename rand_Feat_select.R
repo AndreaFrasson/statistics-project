@@ -4,6 +4,18 @@ library(tidyr)
 library(rpart)
 library(randomForest)
 library(foreach)
+library(ggplot2)
+
+get.error <- function(i){
+  bio.rf <- randomForest(class ~ ., type = 'classification', data = train_data, 
+                         importance=TRUE, ntree = nt, mtry = features)
+  
+  
+  y.hat <- predict(bio.rf, newdata = test_data[-10])
+  
+  cm <- table(test_data$class, y.hat)
+  as.numeric((cm[2,1] + cm[1,2])/sum(cm))
+}
 
 #open dataset
 data("biopsy")
@@ -17,27 +29,17 @@ test_data <- testing(data_split)
 
 #parameter
 nt <- 100 # number of trees in each round
-nf <- c(1:9) # number of features extracted in each tree
+nf <- c(1:(ncol(df)-1)) # number of features extracted in each tree
 
 
 errors_feat <- c()
 
 for(features in nf){
-  test_error <- c()
-  for(i in 1:100){
-    bio.rf <- randomForest(class ~ ., type = 'classification', data = train_data, 
-                           importance=TRUE, ntree = nt, mtry = features)
-    y.hat <- predict(bio.rf, newdata = test_data[-10])
-    
-    cm <- table(test_data$class, y.hat)
-    test_error[i] <- as.numeric((cm[2,1] + cm[1,2])/sum(cm))
-  }
-  errors_feat[features] <- mean(test_error)
+  result <- t(sapply(1:100, get.error))
+  errors_feat[features] <- mean(result)
 }
 
 errors_feat
-
-library(ggplot2)
 
 ggplot() + geom_point(aes(x = nf, y = errors_feat))
 
