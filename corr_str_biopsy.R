@@ -1,4 +1,4 @@
-library(MLDataR)
+library(MASS)
 library(tidymodels)
 library(tidyr)
 library(rpart)
@@ -6,15 +6,25 @@ library(randomForest)
 library(foreach)
 library(ggplot2)
 library(geometry)
-library(zeallot)
+library(mlbench)
+
+
+get.error <- function(i){
+  bio.rf <- randomForest(class ~ ., type = 'classification', data = train_data, 
+                         importance=TRUE, ntree = nt, mtry = features, replace = T)
+  
+  
+  y.hat <- predict(bio.rf, newdata = subset(test_data, select = -c(class)))
+  
+  cm <- table(test_data$class, y.hat)
+  as.numeric((cm[2,1] + cm[1,2])/sum(cm))
+}
 
 #open dataset
-data("stroke_classification")
-df <- stroke_classification[-c(1)]
+data("biopsy")
+df <- biopsy[-c(1)]
 df <- na.omit(df)
-
-# Convert 1s to a positive label and 0s to a negative label
-df$stroke <- factor(ifelse(df$stroke == 1, "0", "1"))
+df$class <- factor(ifelse(df$class == 'benign', "0", "1"))
 
 
 # Split the data into training and testing sets
@@ -28,19 +38,19 @@ nt <- 100
 set.seed(1234)
 
 get.stcor <- function(i){
-  bio.rf <- randomForest(stroke ~ ., type = 'classification', data = train_data, 
+  bio.rf <- randomForest(class ~ ., type = 'classification', data = train_data, 
                          importance=TRUE, ntree = nt, mtry = f, replace = T, norm.votes = F)
   
   
   
   Qs <- as.data.frame(bio.rf$votes/bio.rf$oob.times) #proportion OOB votes cast at x for each class
-  mr <- c(Qs['0'] - Qs['1'])[[1]] # margin for the random forest
+  mr <- c()
   squared.mr <- c()
   sd_k <- c()
   
   #correction on the sign and quantities for the computation of the strength and correlation
   for(i in 1:nrow(train_data)){
-    y <- train_data[i,'stroke']
+    y <- train_data[i,'class']
     
     mr[i] <- Qs[i, y] - max(Qs[i, !(names(Qs) %in% y)])
     squared.mr[i] <- (Qs[i, y] - max(Qs[i, !(names(Qs) %in% y)]))**2
