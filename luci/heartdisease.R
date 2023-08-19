@@ -8,13 +8,13 @@ library(geometry)
 library(MLDataR)
 
 get.error <- function(i){
-  bio.rf <- randomForest(class ~ ., type = 'classification', data = train_data, 
+  bio.rf <- randomForest(HeartDisease ~ ., type = 'classification', data = train_data, 
                          importance=TRUE, ntree = nt, mtry = features, replace = T)
   
   
-  y.hat <- predict(bio.rf, newdata = subset(test_data, select = -c(class)))
+  y.hat <- predict(bio.rf, newdata = subset(test_data, select = -c(HeartDisease)))
   
-  cm <- table(test_data$class, y.hat)
+  cm <- table(test_data$HeartDisease, y.hat)
   as.numeric((cm[2,1] + cm[1,2])/sum(cm))
 }
 
@@ -23,13 +23,15 @@ get.error <- function(i){
 
 #open dataset
 data("heartdisease") 
-df <- heartdisease[-c(1)]
+df <- heartdisease
 df <- na.omit(df)
-df
+head(df)
 
 #stampa dei valori unici di classificazione
 unique_values <- unique(df$HeartDisease)
-print(unique_values) # 0,1
+print(unique_values) # HeartDisease 0 - 1
+
+df$HeartDisease <- factor(ifelse(df$HeartDisease == '1', "1", "0"))
 
 # Split the data into training and testing sets
 data_split <- initial_split(df, prop = 0.75)
@@ -40,12 +42,12 @@ test_data <- testing(data_split)
 
 ####################################################################
 # 4-random forest using random input (attributes) selection
-nt <- 50 # number of trees in each round
+nt <-100 # number of trees in each round
 nf <- c(1:(ncol(df)-1)) # number of features considered in each split
 errors_feat <- c()
 
 for(features in nf){
-  result <- t(sapply(1:50, get.error))
+  result <- t(sapply(1:100, get.error))
   errors_feat[features] <- mean(result)
 }
 
@@ -62,7 +64,7 @@ nf <- c(1:(ncol(df)-1)) # number of features extracted in each tree
 errors_feat <- c()
 
 for(features in nf){
-  result <- t(sapply(1:50, get.error))
+  result <- t(sapply(1:100, get.error))
   errors_feat[features] <- mean(result)
 }
 
@@ -81,7 +83,7 @@ lc <- data <- data.frame(matrix(NA,    # Create empty data frame
                                 nrow = nrow(df),
                                 ncol = 0))
 
-combinations <- combn(colnames(subset(df, select = -c(class))), L, simplify = F)
+combinations <- combn(colnames(subset(df, select = -c(HeartDisease))), L, simplify = F)
 
 for(i in combinations){
   coef <- c(runif(L, -1,1))
@@ -93,7 +95,7 @@ for(i in combinations){
 
 }
 
-lc$class <- df$class
+lc$HeartDisease <- df$HeartDisease
 
 #random forest on the new dataset
 # Split the data into training and testing sets
@@ -102,13 +104,13 @@ train_data <- training(data_split)
 test_data <- testing(data_split)
 
 
-nt <- 50
+nt <- 100
 #different number of features
 nf <- c(1:(ncol(df)-1)) # number of features extracted in each tree
 errors_feat <- c()
 
 for(features in nf){
-  result <- t(sapply(1:50, get.error))
+  result <- t(sapply(1:100, get.error))
   errors_feat[features] <- mean(result)
 }
 
