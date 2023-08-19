@@ -17,6 +17,7 @@ get.error <- function(i){
 }
 
 df <- read.csv("http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-white.csv", sep = ";")
+df$quality <- factor(as.character(df$quality))
 
 # Split the data into training and testing sets
 data_split <- initial_split(df, prop = 0.75)
@@ -30,7 +31,7 @@ nf <- c(1:(ncol(df)-1)) # number of features considered in each split
 errors_feat <- c()
 
 for(features in nf){
-  result <- t(sapply(1:100, get.error))
+  result <- t(sapply(1:2, get.error))
   errors_feat[features] <- mean(result)
 }
 

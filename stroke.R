@@ -24,6 +24,7 @@ get.error <- function(i){
 data("stroke_classification")
 df <- stroke_classification[-c(1)]
 df <- na.omit(df)
+df$stroke <- factor(ifelse(df$stroke == 1, "0", "1"))
 
 
 # Split the data into training and testing sets
@@ -40,7 +41,7 @@ nf <- c(1:(ncol(df)-1)) # number of features considered in each split
 errors_feat <- c()
 
 for(features in nf){
-  result <- t(sapply(1:100, get.error))
+  result <- t(sapply(1:5, get.error))
   errors_feat[features] <- mean(result)
 }
 
