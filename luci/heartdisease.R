@@ -33,6 +33,12 @@ print(unique_values) # HeartDisease 0 - 1
 
 df$HeartDisease <- factor(ifelse(df$HeartDisease == '1', "1", "0"))
 
+# Ricerca ed eliminazione delle variabili categoriche 
+# (non ha senso fare one-hot encoding perchè non apportano un valore reale ??)
+col_to_remove <- c("Sex", "RestingECG", "Angina")
+df <- df[, !(names(df) %in% col_to_remove)]
+head(df)
+
 # Split the data into training and testing sets
 data_split <- initial_split(df, prop = 0.75)
 train_data <- training(data_split)
