@@ -5,35 +5,32 @@ library(randomForest)
 library(foreach)
 library(ggplot2)
 library(geometry)
-library(mlbench)
+library(kernlab)
 
 get.error <- function(i){
-  bio.rf <- randomForest(Class ~ ., type = 'classification', data = train_data, 
+  bio.rf <- randomForest(type ~ ., type = 'classification', data = train_data, 
                          importance=TRUE, ntree = nt, mtry = features, replace = T)
   
   
-  y.hat <- predict(bio.rf, newdata = subset(test_data, select = -c(Class)))
+  y.hat <- predict(bio.rf, newdata = subset(test_data, select = -c(type)))
   
-  cm <- table(test_data$Class, y.hat)
+  cm <- table(test_data$type, y.hat)
   as.numeric((cm[2,1] + cm[1,2])/sum(cm))
 }
 
-# mostra quali dataset sono disponibili nel pacchetto
-#data(package = "mlbench")
+# Mostra quali dataset sono disponibili nel pacchetto
+#data(package = "kernlab")
 
-#open dataset
-data("Sonar")
-df <- Sonar
+# Open dataset
+data("spam")
+df <- spam
 df <- na.omit(df)
 head(df)
 
-#stampa dei valori unici di classificazione
-unique_values <- unique(df$Class)
-print(unique_values) # Class M - R
+# Stampa dei valori unici di classificazione
+print(unique_values <- unique(df$type)) # Type spam - nonspam 
 
-df$Class <- factor(ifelse(df$Class == 'M', "1", "0"))
-
-# non sono presenti variabili categoriche da eliminare, in quanto tutte le variabili sono numeriche 
+df$type <- factor(ifelse(df$type == 'spam', "1", "0"))
 
 # Split the data into training and testing sets
 data_split <- initial_split(df, prop = 0.75)
@@ -85,7 +82,7 @@ lc <- data <- data.frame(matrix(NA,    # Create empty data frame
                                 nrow = nrow(df),
                                 ncol = 0))
 
-combinations <- combn(colnames(subset(df, select = -c(Class))), L, simplify = F)
+combinations <- combn(colnames(subset(df, select = -c(type))), L, simplify = F)
 
 for(i in combinations){
   coef <- c(runif(L, -1,1))
@@ -97,7 +94,7 @@ for(i in combinations){
 
 }
 
-lc$Class <- df$Class
+lc$type <- df$type
 
 #random forest on the new dataset
 # Split the data into training and testing sets

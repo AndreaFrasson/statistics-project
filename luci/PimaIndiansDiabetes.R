@@ -5,33 +5,35 @@ library(randomForest)
 library(foreach)
 library(ggplot2)
 library(geometry)
-library(datasets)
+library(mlbench)
 
 get.error <- function(i){
-  bio.rf <- randomForest(Survived ~ ., type = 'classification', data = train_data, 
+  bio.rf <- randomForest(diabetes ~ ., type = 'classification', data = train_data, 
                          importance=TRUE, ntree = nt, mtry = features, replace = T)
   
+  y.hat <- predict(bio.rf, newdata = subset(test_data, select = -c(diabetes)))
   
-  y.hat <- predict(bio.rf, newdata = subset(test_data, select = -c(Survived)))
-  
-  cm <- table(test_data$Survived, y.hat)
+  cm <- table(test_data$diabetes, y.hat)
   as.numeric((cm[2,1] + cm[1,2])/sum(cm))
 }
 
 # mostra quali dataset sono disponibili nel pacchetto
-#data(package = "datasets")
+# data(package = "mlbench")
 
 #open dataset
-data("Titanic")
-df <- Titanic[-c(1)]
+data("PimaIndiansDiabetes")
+df <- PimaIndiansDiabetes
 df <- na.omit(df)
 head(df)
 
 #stampa dei valori unici di classificazione
-unique_values <- unique(df$Survived)
-print(unique_values) # Survived 0 - 1 
+unique_values <- unique(df$diabetes)
+print(unique_values) # Diabetes pos - neg
 
-df$Survived <- factor(ifelse(df$Survived == '1', "1", "0"))
+df$diabetes <- factor(ifelse(df$diabetes == 'pos', "1", "0"))
+head(df)
+
+# non sono presenti variabili categoriche da eliminare, in quanto tutte le variabili sono numeriche 
 
 # Split the data into training and testing sets
 data_split <- initial_split(df, prop = 0.75)
@@ -83,7 +85,7 @@ lc <- data <- data.frame(matrix(NA,    # Create empty data frame
                                 nrow = nrow(df),
                                 ncol = 0))
 
-combinations <- combn(colnames(subset(df, select = -c(Survived))), L, simplify = F)
+combinations <- combn(colnames(subset(df, select = -c(diabetes))), L, simplify = F)
 
 for(i in combinations){
   coef <- c(runif(L, -1,1))
@@ -95,7 +97,7 @@ for(i in combinations){
 
 }
 
-lc$Survived <- df$Survived
+lc$diabetes <- df$diabetes
 
 #random forest on the new dataset
 # Split the data into training and testing sets
