@@ -7,7 +7,6 @@ library(ggplot2)
 library(geometry)
 library(datasets)
 
-
 get.error <- function(i){
   bio.rf <- randomForest(Survived ~ ., type = 'classification', data = train_data, 
                          importance=TRUE, ntree = nt, mtry = features, replace = T)
@@ -24,7 +23,7 @@ get.error <- function(i){
 
 #open dataset
 data("Titanic")
-df <- Titanic
+df <- Titanic[-c(1)]
 df <- na.omit(df)
 head(df)
 
@@ -33,7 +32,6 @@ unique_values <- unique(df$Survived)
 print(unique_values) # Survived 0 - 1 
 
 df$Survived <- factor(ifelse(df$Survived == '1', "1", "0"))
-
 
 # Split the data into training and testing sets
 data_split <- initial_split(df, prop = 0.75)

@@ -33,6 +33,8 @@ print(unique_values) # Class M - R
 
 df$Class <- factor(ifelse(df$Class == 'M', "1", "0"))
 
+# non sono presenti variabili categoriche da eliminare, in quanto tutte le variabili sono numeriche 
+
 # Split the data into training and testing sets
 data_split <- initial_split(df, prop = 0.75)
 train_data <- training(data_split)
