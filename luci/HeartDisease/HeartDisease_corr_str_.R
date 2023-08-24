@@ -12,7 +12,7 @@ data("heartdisease")
 df <- heartdisease
 df <- na.omit(df)
 head(df)
-
+df <- as.data.frame(df)
 df$HeartDisease <- factor(ifelse(df$HeartDisease == '1', "1", "0"))
 head(df)
 
