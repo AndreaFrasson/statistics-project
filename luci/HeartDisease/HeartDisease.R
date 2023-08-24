@@ -32,6 +32,7 @@ unique_values <- unique(df$HeartDisease)
 print(unique_values) # HeartDisease 0 - 1
 
 df$HeartDisease <- factor(ifelse(df$HeartDisease == '1', "1", "0"))
+head(df)
 
 # Ricerca ed eliminazione delle variabili categoriche 
 # (non ha senso fare one-hot encoding perchè non apportano un valore reale ??)

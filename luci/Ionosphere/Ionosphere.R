@@ -5,38 +5,45 @@ library(randomForest)
 library(foreach)
 library(ggplot2)
 library(geometry)
-library(kernlab)
+library(mlbench)
 
 get.error <- function(i){
-  bio.rf <- randomForest(type ~ ., type = 'classification', data = train_data, 
+  bio.rf <- randomForest(Class ~ ., type = 'classification', data = train_data, 
                          importance=TRUE, ntree = nt, mtry = features, replace = T)
   
   
-  y.hat <- predict(bio.rf, newdata = subset(test_data, select = -c(type)))
+  y.hat <- predict(bio.rf, newdata = subset(test_data, select = -c(Class)))
   
-  cm <- table(test_data$type, y.hat)
+  cm <- table(test_data$Class, y.hat)
   as.numeric((cm[2,1] + cm[1,2])/sum(cm))
 }
 
 # Mostra quali dataset sono disponibili nel pacchetto
-#data(package = "kernlab")
+#data(package = "mlbench")
 
 # Open dataset
-data("spam")
-df <- spam
+data("Ionosphere")
+df <- Ionosphere
 df <- na.omit(df)
 head(df)
 
 # Stampa dei valori unici di classificazione
-print(unique_values <- unique(df$type)) # Type spam - nonspam 
+  print(unique_values <- unique(df$Class)) # Class good - bad 
 
-df$type <- factor(ifelse(df$type == 'spam', "1", "0"))
+df$Class <- factor(ifelse(df$Class == 'good', "1", "0"))
+head(df)
+
+# Ricerca ed eliminazione delle variabili categoriche 
+# (non ha senso fare one-hot encoding perchè non apportano un valore reale ??)
+print(col_to_remove <- names(df)[sapply(df, function(x) is.character(x) || is.factor(x))])
+col_to_remove <- c("V1", "V2")
+df <- df[, !(names(df) %in% col_to_remove)]
+head(df)
 
 # Split the data into training and testing sets
 data_split <- initial_split(df, prop = 0.75)
 train_data <- training(data_split)
 test_data <- testing(data_split)
-
 
 
 ####################################################################
@@ -82,7 +89,7 @@ lc <- data <- data.frame(matrix(NA,    # Create empty data frame
                                 nrow = nrow(df),
                                 ncol = 0))
 
-combinations <- combn(colnames(subset(df, select = -c(type))), L, simplify = F)
+combinations <- combn(colnames(subset(df, select = -c(Class))), L, simplify = F)
 
 for(i in combinations){
   coef <- c(runif(L, -1,1))
