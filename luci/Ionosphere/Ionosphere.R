@@ -101,7 +101,7 @@ for(i in combinations){
 
 }
 
-lc$type <- df$type
+lc$Class <- df$Class
 
 #random forest on the new dataset
 # Split the data into training and testing sets
